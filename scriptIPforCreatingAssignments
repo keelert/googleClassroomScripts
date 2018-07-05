@@ -1,0 +1,140 @@
+function getSSInfo() {
+
+  var weekday=new Array("Sunday", "Monday","Tuesday", "Wednesday","Thursday","Friday","Saturday" );
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var rangeSS = sheet.getDataRange()
+  var data  = sheet.getDataRange().getValues();
+
+//    for (var i = 1; i < data.length; i++) {
+//  start at row 1; row 0 is the header row
+    for (var i = 1; i < 3; i++) {
+
+
+
+// Script Test ID = 15869620253
+// script test 7-5-2018 = 14870963067
+// creator ID = 101561150739869975251 = Tom Keeler
+  
+    var courseId = "14870963067";
+    
+    Logger.log('Start Month: ' + data[i][0]);
+    Logger.log('Start Day: ' + data[i][1]);
+    Logger.log('Start Year: ' + data[i][2]);
+    Logger.log('Number of days in week:' + data[i][3]);
+    Logger.log('Sched Month: ' + data[i][4]);
+    Logger.log('Sched Day: ' + data[i][5]);
+    Logger.log('Sched Year: ' + data[i][6]);
+    Logger.log('Title: ' + data[i][7]);
+    var titleFromSS = data[i][7];
+    Logger.log('Description: ' + data[i][8]);
+    Logger.log('File title: ' + data[i][9]);
+    var FirstDriveFileTitleFromSS = data[i][9];
+    Logger.log('File ID: ' + data[i][10]);
+    Logger.log('daily flag: ' + data[i][11]);  
+    Logger.log('link title: ' + data[i][12]);
+    Logger.log('link URL: ' + data[i][13]);
+
+
+    var scheduledTimeString = data[i][6] +"-"+data[i][4] +"-"+data[i][5] +"T20:01:23.045123456Z";
+    Logger.log('scheduledTime: ' + scheduledTimeString );
+    
+    // create a date object for the due date - this is the start of the school week
+    // usually Monday but sometimes Tuesday or even Thursday
+    // month start counting at 0; year, month - 1, day
+    var startOfWeek = new Date(data[i][2],data[i][0]-1, data[i][1]);
+    Logger.log("startOfWeek:"+ startOfWeek);
+    startDayOfWeek = startOfWeek.getDay();
+    Logger.log("startDayOfWeek as number:"+ startDayOfWeek);
+    Logger.log("startDayOfWeek as string:"+ weekday[startDayOfWeek]);
+    
+
+    // need to get to this format: "2018-02-27T00:31:11.971Z"
+    // month starts counting at zero so need to add 1
+    // getDate gets day of the month - can't use getDay which returns day of the week
+    var now = new Date();
+    var utcTimestamp = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + (now.getDate()) + "T12:00:00.000Z";
+    Logger.log('currentTime: ' + utcTimestamp );     
+    
+    var ClassSource =  {"creatorUserId":"101561150739869975251",
+      "dueDate":{"month":data[i][0],"year": data[i][2],"day":data[i][1]},
+
+      "scheduledTime": scheduledTimeString,
+      "state":"DRAFT",
+      "courseId": courseId,
+      // setting hours to 19 in 3 pm -- this may be GMT conversion
+      "dueTime":{"hours":19,"minutes":00},
+      "materials":
+      [
+       {"driveFile":
+        {"shareMode":"STUDENT_COPY",
+         "driveFile":{"title":data[i][9],
+         "alternateLink":"https://drive.google.com/open?id="+data[i][10],
+         "id":data[i][10],
+         "thumbnailUrl":"https://drive.google.com/thumbnail?id=1Q2Wgi5aVOMdO9ZHVY2yCg2KokYyDyYAF&sz=s200"}
+         }}
+   
+      ],
+      "assigneeMode":"ALL_STUDENTS",
+      // need to set creation time to the current time
+      "creationTime": utcTimestamp,
+      "title":titleFromSS,
+      "description": data[i][8],
+       "maxPoints":100,
+      "alternateLink":"http://classroom.google.com/c/NTc1Mjk4MDMxMVpa/a/MTIxNzcxNDAyNjRa/details",
+      "submissionModificationMode":"MODIFIABLE_UNTIL_TURNED_IN",
+      "updateTime":utcTimestamp,
+      "workType":"ASSIGNMENT"};
+      
+      // now check for optional additional materials. 
+      // materials is an array of Material object
+
+
+      /*{"link”:
+          {"title":"CNN - Breaking News, Latest News and Videos”,
+           "url":"https://www.cnn.com”,
+            "thumbnailUrl":"https://www.google.com/webpagethumbnail?c=73&s=105:70&f=0&d=https://www.cnn.com&a=AIYkKU_yFSsTIhLmh-bh4wfWjHodCgoVMw”
+          }
+          }; */
+//      ClassSource.materials.push(linkMaterial);
+
+
+/*         if (FirstDriveFileTitleFromSS == "NA"){
+           Logger.log('ClassSource before: ' + ClassSource.materials);
+           ClassSource.materials.splice(0, 1);
+           Logger.log('ClassSource after: ' + ClassSource.materials);
+         }
+*/         
+
+// you can use dot notation to update individual fields e.g.
+// ClassSource.title = "overwrite title";
+// Now the question is: can you check for a field being empty in the spreadsheet and not add it if it is
+       if (data[i][11]==1){
+           // create an assignment for each day in the week
+           // Number of days in week: data[i][3]
+           // startDayOfWeek = 1 if Monday, 2 if Tuesday, etc
+           var numDaysInWeek = data[i][3];
+           var saveTitle = ClassSource.title;
+           for (idx=0; idx < numDaysInWeek; idx++){
+               ClassSource.title = saveTitle + " " + weekday[startDayOfWeek + idx];
+            
+               Logger.log("title:" + ClassSource.title);
+           
+               Classroom.Courses.CourseWork.create(ClassSource, courseId)
+           }
+         }
+        else{
+           Logger.log('daily = False');
+           Classroom.Courses.CourseWork.create(ClassSource, courseId)
+        };
+ 
+
+
+
+
+
+
+
+
+
+  }
+}
