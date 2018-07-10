@@ -1,0 +1,28 @@
+function listFilesInFolder(folderName) {
+
+   var sheet = SpreadsheetApp.getActiveSheet();
+   sheet.appendRow(["Name", "File-Id"]);
+
+// grammarRevolution : https://drive.google.com/drive/folders/1RY1oXAqCwqN49SADyHh3_ysySJIsbAI4?usp=sharing
+// designProject - get link: https://drive.google.com/open?id=1CeDBRoxeIHzSjk4zJ9CqVejbcgm9lCVQ 
+// designProject - share: https://drive.google.com/drive/folders/1CeDBRoxeIHzSjk4zJ9CqVejbcgm9lCVQ?usp=sharing
+
+//change the folder ID below to reflect your folder's ID (look in the URL when you're in your folder)
+    var folder = DriveApp.getFolderById("1CeDBRoxeIHzSjk4zJ9CqVejbcgm9lCVQ");
+    var contents = folder.getFiles();
+
+    var cnt = 0;
+    var file;
+
+    while (contents.hasNext()) {
+        var file = contents.next();
+        cnt++;
+
+           data = [
+                file.getName(),
+                file.getId(),
+            ];
+
+            sheet.appendRow(data);
+    };
+};
