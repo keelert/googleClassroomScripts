@@ -1,0 +1,192 @@
+function myFunctionThreeFilesAndOneYouTube() {
+    Logger.log('Start');
+  var weekday=new Array("Sunday", "Monday","Tuesday", "Wednesday","Thursday","Friday","Saturday" );
+  var otherSheet = SpreadsheetApp.getActive();
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var rangeSS = sheet.getDataRange()
+  var data  = sheet.getDataRange().getValues();
+  
+  
+
+
+//    for (var i = 1; i < data.length; i++) {
+//         
+//  start at row 1; row 0 is the header row
+    for (var i = 3; i < 4; i++) {
+
+
+
+
+// Script test July 15 2018 , 15928344339 ,
+
+//URL for Anki add video: https://youtu.be/A58G_UADQF0
+// creator ID = 101561150739869975251 = Tom Keeler
+  
+    var courseId = "15928344339";
+    Utilities.sleep(5000)
+    Logger.log('Start Month: ' + data[i][0]);
+    Logger.log('Start Day: ' + data[i][1]);
+    Logger.log('Start Year: ' + data[i][2]);
+    Logger.log('Number of days in week:' + data[i][3]);
+    Logger.log('Sched Month: ' + data[i][4]);
+    Logger.log('Sched Day: ' + data[i][5]);
+    Logger.log('Sched Year: ' + data[i][6]);
+    Logger.log('Title: ' + data[i][7]);
+    var titleFromSS = data[i][7];
+    Logger.log('Description: ' + data[i][8]);
+    Logger.log('File title: ' + data[i][9]);
+
+    Logger.log('File ID: ' + data[i][10]);
+    Logger.log('daily flag: ' + data[i][11]);  
+    Logger.log('link title: ' + data[i][12]);
+    Logger.log('link URL: ' + data[i][13]);    
+    Logger.log('File 2 title: ' + data[i][14]);
+    Logger.log('File 2 ID: ' + data[i][15]);
+    Logger.log('File 3 title: ' + data[i][16]);
+    Logger.log('File 3 ID: ' + data[i][17]);
+    Logger.log('File 4 title: ' + data[i][18]);
+    Logger.log('File 4 ID: ' + data[i][19]);
+
+
+
+    var scheduledTimeString = data[i][6] +"-"+data[i][4] +"-"+data[i][5] +"T20:01:23.045123456Z";
+    Logger.log('scheduledTime: ' + scheduledTimeString );
+    
+    // create a date object for the due date - this is the start of the school week
+    // usually Monday but sometimes Tuesday or even Thursday
+    // month start counting at 0; year, month - 1, day
+    var startOfWeek = new Date(data[i][2],data[i][0]-1, data[i][1]);
+    Logger.log("startOfWeek:"+ startOfWeek);
+    startDayOfWeek = startOfWeek.getDay();
+    Logger.log("startDayOfWeek as number:"+ startDayOfWeek);
+    Logger.log("startDayOfWeek as string:"+ weekday[startDayOfWeek]);
+    
+    var numDaysInWeek = data[i][3];
+    var dueDay = data[i][1] + numDaysInWeek -1 /* for due last day of week */
+    Logger.log("dueDay" + dueDay);
+    // need to get to this format: "2018-02-27T00:31:11.971Z"
+    // month starts counting at zero so need to add 1
+    // getDate gets day of the month - can't use getDay which returns day of the week
+    var now = new Date();
+    var utcTimestamp = now.getFullYear() + "-" + (now.getMonth()+1) + "-" + (now.getDate()) + "T12:00:00.000Z";
+    Logger.log('currentTime: ' + utcTimestamp );     
+    
+    var dueDate = startOfWeek; 
+    Logger.log(dueDate.toSource());
+    dueDate.setDate(dueDate.getDate()+numDaysInWeek-1);
+    Logger.log(dueDate.toSource());
+    dueMonth = dueDate.getMonth();
+    dueDay= dueDate.getDate();
+    Logger.log("dueDay" + dueDay);
+    
+ // 15 July 2018 - try to get thumbnails work from parameters
+ 
+    var ClassSource =  {"creatorUserId":"101561150739869975251",
+      "dueDate":{"month":data[i][0],"year": data[i][2],"day":data[i][1]},
+
+      "scheduledTime": scheduledTimeString,
+      "state":"DRAFT",
+      "courseId": courseId,
+      // setting hours to 19 in 3 pm -- this may be GMT conversion
+      "dueTime":{"hours":19,"minutes":00},
+      "materials":
+      [
+       {"driveFile":
+        {"shareMode":"STUDENT_COPY",
+         "driveFile":{"title":data[i][9],
+         "alternateLink":"https://drive.google.com/open?id="+data[i][10],
+         "id":data[i][10],
+         "thumbnailUrl":"https://drive.google.com/thumbnail?id=" + data[i][10] + "&sz=s200"}
+         },
+       },
+       {"driveFile":
+        {"shareMode":"STUDENT_COPY",
+         "driveFile":{"title":data[i][14],
+         "alternateLink":"https://drive.google.com/open?id="+data[i][15],
+         "id":data[i][15],
+         "thumbnailUrl":"https://drive.google.com/thumbnail?id=" + data[i][15] + "&sz=s200"}
+         },
+       },
+       {"driveFile":
+        {"shareMode":"STUDENT_COPY",
+         "driveFile":{"title":data[i][16],
+         "alternateLink":"https://drive.google.com/open?id="+data[i][17],
+         "id":data[i][17],
+         "thumbnailUrl":"https://drive.google.com/thumbnail?id=" + data[i][17] + "&sz=s200"}
+         },
+       },
+              {"driveFile":
+        {"shareMode":"STUDENT_COPY",
+         "driveFile":{"title":data[i][18],
+         "alternateLink":"https://drive.google.com/open?id="+data[i][19],
+         "id":data[i][19],
+         "thumbnailUrl":"https://drive.google.com/thumbnail?id=" + data[i][19] + "&sz=s200"}
+         },
+       },
+         {"link":
+             {"title":"Summary of Anki cards added - how to submit to Google Classroom",
+              "url":"https://youtu.be/A58G_UADQF0",
+               "thumbnailUrl":"https://img.youtube.com/vi/A58G_UADQF0/0.jpg"
+             }
+          }
+   
+      ],
+      "assigneeMode":"ALL_STUDENTS",
+      // need to set creation time to the current time
+      "creationTime": utcTimestamp,
+      "title":titleFromSS,
+      "description": data[i][8],
+       "maxPoints":100,
+      "alternateLink":"http://classroom.google.com/c/NTc1Mjk4MDMxMVpa/a/MTIxNzcxNDAyNjRa/details",
+      "submissionModificationMode":"MODIFIABLE_UNTIL_TURNED_IN",
+      "updateTime":utcTimestamp,
+      "workType":"ASSIGNMENT"};
+      
+      // now check for optional additional materials. 
+      // materials is an array of Material object
+
+
+        
+
+// you can use dot notation to update individual fields e.g.
+// ClassSource.title = "overwrite title";
+// Now the question is: can you check for a field being empty in the spreadsheet and not add it if it is
+
+
+ 
+                      
+       if (data[i][11]==1){
+           // create an assignment for each day in the week
+           // Number of days in week: data[i][3]
+           // startDayOfWeek = 1 if Monday, 2 if Tuesday, etc
+           // make sure to update the due date
+
+           var saveTitle = ClassSource.title;
+
+           for (idx=0; idx < numDaysInWeek; idx++){
+               ClassSource.title = saveTitle + " " + weekday[startDayOfWeek + idx];
+               tempDueDate = {"month":data[i][0],"year": data[i][2],"day":data[i][1]+idx}
+               ClassSource.dueDate = tempDueDate;
+               Logger.log("title:" + ClassSource.title);
+           
+               Classroom.Courses.CourseWork.create(ClassSource, courseId)
+           } 
+         }
+        else{
+           Logger.log('daily = False');
+           // due Date defaults to first day of the week.
+           // get last day of the week by adding number of days in the week - 1
+           // then subtract 1 to get Thursday
+           Classroom.Courses.CourseWork.create(ClassSource, courseId)
+        };
+     
+
+
+
+
+  }
+
+}
+
+  
+
